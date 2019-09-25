@@ -1,0 +1,67 @@
+---
+title: "GIDEON"
+output: github_document
+---
+
+```{r}
+g<-read.csv("2019-09-23 19_27_25.csv",header = F)
+head(g)
+dim(g)
+g$V1<-as.character(g$V1)
+g$V2<-as.character(g$V2)
+g$V2<-trimws(g$V2, which = c("l")
+       #, whitespace =   "[ \t\r\n]"
+       )
+head(g$V2
+     )
+```
+
+```{r}
+all<-read.csv("allmammGID-clean20190812.csv")
+head(all)
+```
+
+```{r}
+#subset zoonotic
+all3<-all[all$Label ==1,]
+head(all3)
+#subset matched columns
+all2<-all3[,c("Spp","Zoonoses")]
+
+all2$Spp<-gsub("_"," ",all2$Spp)
+head(all2)
+dim(all2)
+```
+
+#check if spp-zoonoses combs match
+```{r}
+g$sp_z<-paste(g$V1,"_",g$V2
+              #,sep=""
+              )
+
+head(g)
+dim(g)
+g_u<-unique(g[,c("V1","V2","sp_z")])
+dim(g_u)
+
+all2$sp_z<-paste(all2$Spp,"_",all2$Zoonoses )
+head(all2)
+dim(all2)
+compare<-merge(g,all2,by= "sp_z")
+dim(compare)
+compare_u<-merge(g_u,all2,by= "sp_z")
+dim(compare_u)
+```
+
+```{r}
+missing<-g_u[g_u$sp_z%in%all2$sp_z==F,]
+dim(missing)
+
+missing_country = merge(missing, g)
+dim(missing_country)
+names(missing_country) = c("Spp", "Disease", "sp_z", "Country")
+missing_country = missing_country[,c("Spp", "Disease", "Country")]
+write.csv(missing_country, "missing.compare.csv")
+```
+
+
